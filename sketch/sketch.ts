@@ -13,8 +13,8 @@ let yStep = 75;
 function preload() {
     table = loadTable(
         'data/IEEE VIS papers 1990-2018 - Main dataset.csv',
-        'csv', 
-        'header');
+        // @ts-ignore
+        'csv', 'header');
 }
 
 function setup() {    
@@ -32,6 +32,7 @@ function setup() {
     initializePapersPositions(papers);
 
     coauthors = getUniqueAuthors(papers);
+    // @ts-ignore
     coauthors.splice( coauthors.find(author => author.name == author), 1 );
 
     minAuthorCitations = Infinity;
@@ -65,6 +66,7 @@ function getUniqueAuthors(papers: Paper[]): Author[] {
 
     papers.forEach(paper => {
         paper.authors.forEach(authorName => {
+            // @ts-ignore
             var author = authors.find(author => author.name == authorName);
             if (author == undefined) {
                 author = new Author(authorName, getAuthorCitations(authorName));
