@@ -1,0 +1,13 @@
+{
+  "name": "research-career-visualization",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"browser-sync start --server -w\" \" tsc --watch\""
+  },
+  "devDependencies": {
+    "@types/p5": "^0.7.1",
+    "browser-sync": "^2.26.3",
+    "concurrently": "^3.6.1",
+    "typescript": "^2.9.2"
+  }
+}
