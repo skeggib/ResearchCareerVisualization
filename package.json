@@ -2,7 +2,7 @@
   "name": "research-career-visualization",
   "version": "1.0.0",
   "scripts": {
-    "dev": "concurrently \"browser-sync start --server -w\" \" tsc --watch\""
+    "start": "concurrently \"browser-sync start --server -w\" \" tsc --watch\""
   },
   "devDependencies": {
     "@types/p5": "^0.7.1",

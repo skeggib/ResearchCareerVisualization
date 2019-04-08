@@ -1,23 +1,30 @@
 let table: p5.Table;
 let author = "Alex T. Pang";
+//let author = "Tamara Munzner";
+//let author = "Heidrun Schumann";
 let papers: Paper[];
 let canvasWidth = window.innerWidth;
 let minCitations: number;
 let maxCitations: number;
-let topMargin = 200;
+let topMargin = 150;
 let coauthors: Author[];
 let minAuthorCitations: number;
 let maxAuthorCitations: number;
 let yStep = 75;
+let grayedColor: p5.Color;
+let paperColor: p5.Color;
+let authorColor: p5.Color;
 
 function preload() {
-    table = loadTable(
-        'data/IEEE VIS papers 1990-2018 - Main dataset.csv',
-        // @ts-ignore
-        'csv', 'header');
+    // @ts-ignore
+    table = loadTable('data/IEEE VIS papers 1990-2018 - Main dataset.csv', 'csv', 'header');
 }
 
-function setup() {    
+function setup() {
+    grayedColor = color(210);
+    paperColor = color("#11144c");
+    authorColor = color("#3a9679");
+
     papers = getAuthorPapers(author, table);
 
     minCitations = Infinity;
@@ -32,8 +39,8 @@ function setup() {
     initializePapersPositions(papers);
 
     coauthors = getUniqueAuthors(papers);
-    // @ts-ignore
-    coauthors.splice( coauthors.find(author => author.name == author), 1 );
+    
+    coauthors.remove(coauthor => coauthor.name == author);
 
     minAuthorCitations = Infinity;
     maxAuthorCitations = 0;
@@ -49,7 +56,79 @@ function setup() {
     createCanvas(canvasWidth, papers.length * yStep + topMargin);
 }
 
-function getAuthorCitations(author: string) {
+function draw() {
+    clear();
+    drawTitle(author);
+
+    var isMouseOverSomething = false;
+    var highlightedPaper: Paper = undefined;
+    var highlightedCoauthor: Author = undefined;
+    papers.forEach(paper => {
+        if (paper.isMouseOver(mouseX, mouseY)) {
+            isMouseOverSomething = true;
+            highlightedPaper = paper;
+        }
+    });
+    coauthors.forEach(coauthor => {
+        if (coauthor.isMouseOver(mouseX, mouseY)) {
+            isMouseOverSomething = true;
+            highlightedCoauthor = coauthor;
+        }
+    });
+
+    papers.forEach(paper => {
+        paper.displayMode = isMouseOverSomething ? DisplayMode.GRAYED : DisplayMode.NORMAL;
+    });
+    coauthors.forEach(coauthor => {
+        coauthor.displayMode = isMouseOverSomething ? DisplayMode.GRAYED : DisplayMode.NORMAL;
+    });
+
+    if (highlightedPaper !== undefined) {
+        highlightedPaper.displayMode = DisplayMode.HIGHLIGHTED;
+        coauthors.forEach(coauthor => {
+            if (coauthor.papers.indexOf(highlightedPaper) >= 0)
+                coauthor.displayMode = DisplayMode.HIGHLIGHTED;
+        });
+    }
+    if (highlightedCoauthor !== undefined) {
+        highlightedCoauthor.displayMode = DisplayMode.HIGHLIGHTED;
+        highlightedCoauthor.papers.forEach(paper => paper.displayMode = DisplayMode.HIGHLIGHTED);
+    }
+
+    for (let i = 0; i < papers.length; i++)
+        papers[i].drawConnection(i > 0 ? papers[i-1] : undefined);
+
+    for (let i = 0; i < coauthors.length; i++)
+        coauthors[i].drawConnections();
+    
+    for (let i = 0; i < papers.length; i++)
+        papers[i].drawShape(i > 0 ? papers[i-1] : undefined);
+
+    for (let i = 0; i < coauthors.length; i++)
+        coauthors[i].drawShape();
+
+    for (let i = 0; i < coauthors.length; i++)
+        coauthors[i].drawName();
+
+    for (let i = 0; i < papers.length; i++)
+        papers[i].drawTitle();
+}
+
+interface Array<T> {
+    remove(predicate: (item: T) => boolean): void;
+}
+
+Array.prototype.remove = function(predicate) {
+    for (let i = 0; i < this.length; i++) {
+        const element = this[i];
+        if (predicate(element)) {
+            this.splice(i, 1);
+            return;
+        }
+    }
+}
+
+function getAuthorCitations(author: string): number {
     var citations = 0;
     for (let i = 0; i < table.getRowCount(); i++) {
         const row = table.getRow(i);
@@ -79,6 +158,27 @@ function getUniqueAuthors(papers: Paper[]): Author[] {
     });
 
     return authors;
+}
+
+function getAuthorPapers(author: string, table: p5.Table): Paper[] {
+    var papers = Array<Paper>();
+    for (let i = 0; i < table.getRowCount(); i++) {
+        const row = table.getRow(i);
+        const authorsStr = row.get('AuthorNames-Deduped').toString();
+        if (authorsStr.indexOf(author) >= 0) {
+            var authors = Array<string>();
+            authorsStr.split(';').forEach(author => {
+                authors.push(author);
+            });
+            var title = row.get('Title').toString();
+            var year = parseInt(row.get('Year').toString());
+            var authors = authors;
+            var affiliation = row.get('AuthorAffiliation').toString();
+            var citations = parseInt(row.get('AminerCitationCount_02-2019').toString());
+            papers.push(new Paper(title, year, authors, affiliation, citations));
+        }
+    }
+    return papers.sort((a, b) => a.year - b.year);;
 }
 
 function initializePapersPositions(papers: Paper[]) {
@@ -122,56 +222,12 @@ function initializeCoauthorsPositions(coauthors: Author[]) {
     }
 }
 
-function draw() {
-    clear();
-
-    drawTitle(author);
-
-    var previousPaper: Paper = null;
-    papers.forEach(paper => {
-        drawPaper(paper, previousPaper);
-        previousPaper = paper;
-    });
-
-    coauthors.forEach(coauthor => {
-        drawCoauthor(coauthor);
-    });
-}
-
-function drawCoauthor(coauthor: Author) {
-    fill(0, 0, 0);
+function drawTitle(author: string) {
+    textSize(20);
+    textAlign(CENTER, CENTER);
     strokeWeight(0);
-    var minArea = 250;
-    var maxArea = 5000;
-    var area = map(coauthor.citations, minAuthorCitations, maxAuthorCitations, minArea, maxArea);
-    var size = sqrt(area / PI);
-    rect(coauthor.x - size / 2, coauthor.y - size / 2, size, size);
-
-    var mouseOver = 
-        mouseX >= coauthor.x - size / 2 &&
-        mouseX <= coauthor.x + size / 2 &&
-        mouseY >= coauthor.y - size / 2 &&
-        mouseY <= coauthor.y + size / 2;
-    if (mouseOver) {
-        var titleText = coauthor.name + ' (' + coauthor.citations + ' citations)';
-        textAlign(CENTER, BOTTOM);
-        strokeWeight(0);
-        var textW = textWidth(titleText);
-        fill(255);
-        rect(coauthor.x - textW / 2, coauthor.y - size / 2 - 10 - 12, textW, 12);
-        fill(0);
-        text(titleText, coauthor.x, coauthor.y - size / 2 - 10);
-    }
-    
-    strokeWeight(1);
-    stroke(0, 0, 0);
-    coauthor.papers.forEach(paper => {
-        if (mouseOver) {
-            line(coauthor.x, coauthor.y, paper.x, paper.y);
-        } else {
-            dashedLine(coauthor.x, coauthor.y, paper.x, paper.y);
-        }
-    });
+    fill(0, 0, 0);
+    text(author, canvasWidth / 2, topMargin / 3);
 }
 
 function dashedLine(x1: number, y1: number, x2: number, y2: number) {
@@ -187,68 +243,41 @@ function dashedLine(x1: number, y1: number, x2: number, y2: number) {
     }
 }
 
-function drawTitle(author: string) {
-    textSize(20);
-    textAlign(CENTER, CENTER);
+function textWithBackground(
+    textToDisplay: string,
+    size: number,
+    x: number,
+    y: number,
+    hAlign: p5.HORIZ_ALIGN,
+    vAlign: p5.VERT_ALIGN,
+    color: p5.Color) {
+
+    textAlign(hAlign, vAlign);
     strokeWeight(0);
-    fill(0, 0, 0);
-    text(author, canvasWidth / 2, topMargin / 3);
-}
-
-function drawPaper(paper: Paper, previousPaper: Paper = null) {
-    var minArea = 500;
-    var maxArea = 10000;
-    var area = map(paper.citations, minCitations, maxCitations, minArea, maxArea);
-    var radius = sqrt(area / PI);
-    fill(0, 0, 0);
-    stroke(0, 0, 0);
-    strokeWeight(0);
-    textSize(12);
-    ellipse(paper.x, paper.y, radius);
-    if (previousPaper != null && paper.x < previousPaper.x) {
-        textAlign(RIGHT, CENTER);
-        text(paper.year, paper.x - radius / 2 - 10, paper.y);
-    } else {
-        textAlign(LEFT, CENTER);
-        text(paper.year, paper.x + radius / 2 + 10, paper.y);
+    textSize(size);
+    var textW = textWidth(textToDisplay);
+    var rectX = x;
+    switch (hAlign) {
+        case CENTER:
+            rectX -= textW / 2;
+            break;
+        case RIGHT:
+            rectX -= textW;
+            break;
     }
-    if (previousPaper != null) {
-        strokeWeight(1);
-        line(paper.x, paper.y, previousPaper.x, previousPaper.y);
+    var rectY = y;
+    switch (vAlign) {
+        case CENTER:
+            rectY -= size / 2;
+            break;
+        case BOTTOM:
+            rectY -= size;
+            break;
     }
-
-    var mouseOver = sqrt(pow(mouseX - paper.x, 2) + pow(mouseY - paper.y, 2)) <= radius / 2;
-    if (mouseOver) {
-        var titleText = paper.title + ' (' + paper.citations + ' citations)';
-        textAlign(CENTER, BOTTOM);
-        strokeWeight(0);
-        var textW = textWidth(titleText);
-        fill(255);
-        rect(paper.x - textW / 2, paper.y - radius / 2 - 10 - 12, textW, 12);
-        fill(0);
-        text(titleText, paper.x, paper.y - radius / 2 - 10);
-    }
-}
-
-function getAuthorPapers(author: string, table: p5.Table): Paper[] {
-    var papers = Array<Paper>();
-    for (let i = 0; i < table.getRowCount(); i++) {
-        const row = table.getRow(i);
-        const authorsStr = row.get('AuthorNames-Deduped').toString();
-        if (authorsStr.indexOf(author) >= 0) {
-            var authors = Array<string>();
-            authorsStr.split(';').forEach(author => {
-                authors.push(author);
-            });
-            var title = row.get('Title').toString();
-            var year = parseInt(row.get('Year').toString());
-            var authors = authors;
-            var affiliation = row.get('AuthorAffiliation').toString();
-            var citations = parseInt(row.get('AminerCitationCount_02-2019').toString());
-            papers.push(new Paper(title, year, authors, affiliation, citations));
-        }
-    }
-    return papers.sort((a, b) => a.year - b.year);;
+    fill(255);
+    rect(rectX, rectY, textW, size);
+    fill(color);
+    text(textToDisplay, x, y);
 }
 
 class Author {
@@ -258,11 +287,74 @@ class Author {
 
     x: number;
     y: number;
+    displayMode: DisplayMode;
 
     constructor(name: string, citations: number) {
         this.name = name;
         this.citations = citations;
         this.papers = new Array<Paper>();
+    }
+
+    isMouseOver(mouseX: number, mouseY: number): boolean {
+        var size = this.getSize();
+        return mouseX >= this.x - size / 2 &&
+               mouseX <= this.x + size / 2 &&
+               mouseY >= this.y - size / 2 &&
+               mouseY <= this.y + size / 2;
+    }
+
+    getSize(): number {
+        var minArea = 250;
+        var maxArea = 5000;
+        var area = map(this.citations, minAuthorCitations, maxAuthorCitations, minArea, maxArea);
+        return sqrt(area / PI);
+    }
+
+    drawShape() {
+        var size = this.getSize();
+        
+        switch (this.displayMode) {
+            case DisplayMode.NORMAL:
+                fill(authorColor);
+                break;
+            case DisplayMode.GRAYED:
+                fill(grayedColor);
+                break;
+            case DisplayMode.HIGHLIGHTED:
+                fill(authorColor);
+                break;
+        }
+
+        strokeWeight(0);
+        rect(this.x - size / 2, this.y - size / 2, size, size);
+    }
+
+    drawConnections() {
+        strokeWeight(1);
+        switch (this.displayMode) {
+            case DisplayMode.NORMAL:
+                stroke(authorColor);
+                this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
+                break;
+            case DisplayMode.GRAYED:
+                stroke(grayedColor);
+                this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
+                break;
+            case DisplayMode.HIGHLIGHTED:
+                stroke(authorColor);
+                this.papers.forEach(paper => {
+                    if (paper.displayMode == DisplayMode.HIGHLIGHTED)
+                        line(this.x, this.y, paper.x, paper.y)
+                });
+                break;
+        }
+    }
+
+    drawName() {
+        if (this.displayMode == DisplayMode.HIGHLIGHTED) {
+            var titleText = this.name + ' (' + this.citations + ' citations)';
+            textWithBackground(titleText, 12, this.x, this.y + this.getSize() / 2 + 10, CENTER, TOP, authorColor);
+        }
     }
 }
 
@@ -275,6 +367,7 @@ class Paper {
 
     x: number;
     y: number;
+    displayMode: DisplayMode;
     
     constructor(title: string, year: number, authors: string[], affiliation: string, citations: number) {
         this.title = title;
@@ -285,4 +378,79 @@ class Paper {
         if (this.citations == null || isNaN(this.citations))
             this.citations = 0;
     }
+
+    isMouseOver(mouseX: number, mouseY: number): boolean {
+        return sqrt(pow(mouseX - this.x, 2) + pow(mouseY - this.y, 2)) <= this.getRadius() / 2;
+    }
+    
+    getRadius(): number {
+        var minArea = 500;
+        var maxArea = 10000;
+        var area = map(this.citations, minCitations, maxCitations, minArea, maxArea);
+        var radius = sqrt(area / PI);
+        return radius;
+    }
+
+    drawShape(previousPaper: Paper) {
+        var radius = this.getRadius();
+        
+        switch (this.displayMode) {
+            case DisplayMode.NORMAL:
+                fill(paperColor);
+                break;
+            case DisplayMode.GRAYED:
+                fill(grayedColor);
+                break;
+            case DisplayMode.HIGHLIGHTED:
+                fill(paperColor);
+                break;
+        }
+
+        strokeWeight(0);
+        ellipse(this.x, this.y, radius);
+        
+        var yearSize = 12;
+        var textColor = this.displayMode == DisplayMode.GRAYED ? grayedColor : color(0);
+        if (previousPaper !== undefined && this.x < previousPaper.x)
+            textWithBackground(this.year.toString(), yearSize, this.x - radius / 2 - 10, this.y, RIGHT, CENTER, textColor);
+        else
+            textWithBackground(this.year.toString(), yearSize, this.x + radius / 2 + 10, this.y, LEFT, CENTER, textColor);
+    }
+
+    drawConnection(previousPaper: Paper) {
+        if (previousPaper !== undefined) {
+            strokeWeight(1);
+            switch (this.displayMode) {
+                case DisplayMode.NORMAL:
+                    if (previousPaper.displayMode != DisplayMode.GRAYED)
+                        stroke(paperColor);
+                    else
+                        stroke(grayedColor);
+                    break;
+                case DisplayMode.GRAYED:
+                    stroke(grayedColor);
+                    break;
+                case DisplayMode.HIGHLIGHTED:
+                    if (previousPaper.displayMode != DisplayMode.GRAYED)
+                        stroke(paperColor);
+                    else
+                        stroke(grayedColor);
+                    break;
+            }
+            line(this.x, this.y, previousPaper.x, previousPaper.y);
+        }
+    }
+
+    drawTitle() {
+        if (this.displayMode == DisplayMode.HIGHLIGHTED) {
+            var titleText = this.title + ' (' + this.citations + ' citations)';
+            textWithBackground(titleText, 12, this.x, this.y - this.getRadius()/2 - 10, CENTER, BOTTOM, paperColor);
+        }
+    }
+}
+
+enum DisplayMode {
+    NORMAL,
+    GRAYED,
+    HIGHLIGHTED
 }
