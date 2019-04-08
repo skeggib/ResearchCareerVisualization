@@ -1,13 +1,17 @@
 {
     "compilerOptions": {
-        "target": "es6",
+        "module": "amd",
+        "noImplicitAny": true,
         "removeComments": true,
         "preserveConstEnums": true,
-        "outFile": "./build/build.js",
-        "sourceRoot": "./sketch/",
-        "rootDir": "./sketch/",
         "sourceMap": true,
-        "noImplicitAny": true,
-        "module": "none"
-    }
+        "outFile": "build/build.js"
+    },
+    "include": [
+        "sketch/**"
+    ],
+    "exclude": [
+        "node_modules",
+        "**/*.spec.ts"
+    ]
 }
