@@ -4,9 +4,9 @@ let author = "Alex T. Pang";
 //let author = "Heidrun Schumann";
 let papers: Paper[];
 let canvasWidth = window.innerWidth;
-let topMargin = 150;
+let topMargin = 130;
 let coauthors: Author[];
-let yStep = 75;
+let yStep = 70;
 
 function preload() {
     // @ts-ignore
@@ -59,7 +59,7 @@ function setup() {
 
 function draw() {
     clear();
-    drawTitle(author, canvasWidth / 2, topMargin / 3);
+    drawTitle(author, canvasWidth / 2, topMargin / 2);
 
     var isMouseOverSomething = false;
     var highlightedPaper: Paper = undefined;

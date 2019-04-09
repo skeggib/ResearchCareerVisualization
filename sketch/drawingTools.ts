@@ -1,9 +1,5 @@
 function drawTitle(author: string, x: number, y: number) {
-    textSize(20);
-    textAlign(CENTER, CENTER);
-    strokeWeight(0);
-    fill(0, 0, 0);
-    text(author, x, y);
+    textWithBackground(author, 20, x, y, CENTER, CENTER, color(0));
 }
 
 function dashedLine(x1: number, y1: number, x2: number, y2: number) {
