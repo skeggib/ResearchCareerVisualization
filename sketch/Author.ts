@@ -63,10 +63,14 @@ class Author {
                 this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
                 break;
             case DisplayMode.HIGHLIGHTED:
-                stroke(this.color);
                 this.papers.forEach(paper => {
-                    if (paper.displayMode == DisplayMode.HIGHLIGHTED)
-                        line(this.x, this.y, paper.x, paper.y)
+                    if (paper.displayMode == DisplayMode.HIGHLIGHTED) {
+                        stroke(this.color);
+                        line(this.x, this.y, paper.x, paper.y);
+                    } else {
+                        stroke(this.gray);
+                        this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
+                    }
                 });
                 break;
         }
