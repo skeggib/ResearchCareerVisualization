@@ -10,16 +10,16 @@ COPY package-lock.json /app/
 WORKDIR /app
 RUN npm i
 
-COPY data/ /app/data
+COPY lib/ /var/www/html/lib
+COPY data/ /var/www/html/data
+COPY index.html /var/www/html/
+
 COPY tsconfig.json /app/
 COPY definitions/ /app/definitions
-COPY index.html /app/
 COPY sketch/ /app/sketch
 
 RUN tsc
 
-RUN cp index.html /var/www/html/
 RUN cp -r build /var/www/html/
-RUN cp -r data /var/www/html/
 
 CMD ["nginx", "-g", "daemon off;"]
