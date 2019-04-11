@@ -8,13 +8,25 @@ class Author {
     x: number;
     y: number;
     displayMode: DisplayMode;
-    color: p5.Color;
-    gray: p5.Color;
+    
+    currentColor: p5.Color;
+    currentConnectionColor: p5.Color;
+    highlightColor: p5.Color;
+    grayColor: p5.Color;
 
     constructor(name: string, citations: number) {
         this.name = name;
         this.citations = citations;
         this.papers = new Array<Paper>();
+    }
+
+    animate() {
+        var targetColor: p5.Color;
+        if (this.displayMode == DisplayMode.GRAYED)
+            targetColor = this.grayColor;
+        else
+            targetColor = this.highlightColor;
+        this.currentColor = lerpColor(this.currentColor, targetColor, 0.1);
     }
 
     isMouseOver(mouseX: number, mouseY: number): boolean {
@@ -34,19 +46,7 @@ class Author {
 
     drawShape() {
         var size = this.getSize();
-        
-        switch (this.displayMode) {
-            case DisplayMode.NORMAL:
-                fill(this.color);
-                break;
-            case DisplayMode.GRAYED:
-                fill(this.gray);
-                break;
-            case DisplayMode.HIGHLIGHTED:
-                fill(this.color);
-                break;
-        }
-
+        fill(this.currentColor);
         strokeWeight(0);
         rect(this.x - size / 2, this.y - size / 2, size, size);
     }
@@ -55,20 +55,20 @@ class Author {
         strokeWeight(1);
         switch (this.displayMode) {
             case DisplayMode.NORMAL:
-                stroke(this.color);
+                stroke(this.currentColor);
                 this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
                 break;
             case DisplayMode.GRAYED:
-                stroke(this.gray);
+                stroke(this.currentColor);
                 this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
                 break;
             case DisplayMode.HIGHLIGHTED:
                 this.papers.forEach(paper => {
                     if (paper.displayMode == DisplayMode.HIGHLIGHTED) {
-                        stroke(this.color);
+                        stroke(this.highlightColor);
                         line(this.x, this.y, paper.x, paper.y);
                     } else {
-                        stroke(this.gray);
+                        stroke(this.grayColor);
                         this.papers.forEach(paper => dashedLine(this.x, this.y, paper.x, paper.y));
                     }
                 });
@@ -79,7 +79,7 @@ class Author {
     drawName() {
         if (this.displayMode == DisplayMode.HIGHLIGHTED) {
             var titleText = this.name + ' (' + this.citations + ' citations)';
-            textWithBackground(titleText, 12, this.x, this.y + this.getSize() / 2 + 10, CENTER, TOP, this.color);
+            textWithBackground(titleText, 12, this.x, this.y + this.getSize() / 2 + 10, CENTER, TOP, this.highlightColor);
         }
     }
 }

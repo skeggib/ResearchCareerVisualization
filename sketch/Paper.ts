@@ -10,8 +10,11 @@ class Paper {
     x: number;
     y: number;
     displayMode: DisplayMode;
-    color: p5.Color;
-    gray: p5.Color;
+
+    currentColor: p5.Color;
+    currentConnectionColor: p5.Color;
+    highlightColor: p5.Color;
+    grayColor: p5.Color;
     
     constructor(
         title: string,
@@ -29,6 +32,22 @@ class Paper {
             this.citations = 0;
     }
 
+    animate(previousPaper: Paper) {
+        var targetColor: p5.Color;
+        if (this.displayMode == DisplayMode.GRAYED)
+            targetColor = this.grayColor;
+        else
+            targetColor = this.highlightColor;
+        this.currentColor = lerpColor(this.currentColor, targetColor, 0.1);
+
+        var targetConnectionColor: p5.Color;
+        if (this.displayMode != DisplayMode.GRAYED && previousPaper != undefined && previousPaper.displayMode != DisplayMode.GRAYED)
+            targetConnectionColor = this.highlightColor;
+        else
+            targetConnectionColor = this.grayColor;
+        this.currentConnectionColor = lerpColor(this.currentConnectionColor, targetConnectionColor, 0.1);
+    }
+
     isMouseOver(mouseX: number, mouseY: number): boolean {
         return sqrt(pow(mouseX - this.x, 2) + pow(mouseY - this.y, 2)) <= this.getRadius() / 2;
     }
@@ -43,24 +62,12 @@ class Paper {
 
     drawShape(previousPaper: Paper) {
         var radius = this.getRadius();
-        
-        switch (this.displayMode) {
-            case DisplayMode.NORMAL:
-                fill(this.color);
-                break;
-            case DisplayMode.GRAYED:
-                fill(this.gray);
-                break;
-            case DisplayMode.HIGHLIGHTED:
-                fill(this.color);
-                break;
-        }
-
+        fill(this.currentColor);
         strokeWeight(0);
         ellipse(this.x, this.y, radius);
         
         var yearSize = 12;
-        var textColor = this.displayMode == DisplayMode.GRAYED ? this.gray : color(0);
+        var textColor = this.displayMode == DisplayMode.GRAYED ? this.grayColor : color(0);
         if (previousPaper !== undefined && this.x < previousPaper.x)
             textWithBackground(this.year.toString(), yearSize, this.x - radius / 2 - 10, this.y, RIGHT, CENTER, textColor);
         else
@@ -70,23 +77,7 @@ class Paper {
     drawConnection(previousPaper: Paper) {
         if (previousPaper !== undefined) {
             strokeWeight(1);
-            switch (this.displayMode) {
-                case DisplayMode.NORMAL:
-                    if (previousPaper.displayMode != DisplayMode.GRAYED)
-                        stroke(this.color);
-                    else
-                        stroke(this.gray);
-                    break;
-                case DisplayMode.GRAYED:
-                    stroke(this.gray);
-                    break;
-                case DisplayMode.HIGHLIGHTED:
-                    if (previousPaper.displayMode != DisplayMode.GRAYED)
-                        stroke(this.color);
-                    else
-                        stroke(this.gray);
-                    break;
-            }
+            stroke(this.currentConnectionColor);
             line(this.x, this.y, previousPaper.x, previousPaper.y);
         }
     }
@@ -94,7 +85,7 @@ class Paper {
     drawTitle() {
         if (this.displayMode == DisplayMode.HIGHLIGHTED) {
             var titleText = this.title + ' (' + this.citations + ' citations)';
-            textWithBackground(titleText, 12, this.x, this.y - this.getRadius()/2 - 10, CENTER, BOTTOM, this.color);
+            textWithBackground(titleText, 12, this.x, this.y - this.getRadius()/2 - 10, CENTER, BOTTOM, this.highlightColor);
         }
     }
 }

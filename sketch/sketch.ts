@@ -27,8 +27,10 @@ function setup() {
     papers.forEach(paper => {
         paper.minCitations = minCitations;
         paper.maxCitations = maxCitations;
-        paper.color = color("#11144c");
-        paper.gray = color(210);
+        paper.currentColor = color("#11144c");
+        paper.currentConnectionColor = color("#11144c");
+        paper.highlightColor = color("#11144c");
+        paper.grayColor = color(210);
     });
 
     initializePapersPositions(papers);
@@ -48,8 +50,10 @@ function setup() {
     coauthors.forEach(coauthor => {
         coauthor.minAuthorCitations = minAuthorCitations;
         coauthor.maxAuthorCitations = maxAuthorCitations;
-        coauthor.color = color("#3a9679");
-        coauthor.gray = color(210);
+        coauthor.highlightColor = color("#3a9679");
+        coauthor.currentColor = color("#3a9679");
+        coauthor.currentConnectionColor = color("#3a9679");
+        coauthor.grayColor = color(210);
     });
     
     initializeCoauthorsPositions(coauthors);
@@ -58,6 +62,11 @@ function setup() {
 }
 
 function draw() {
+    for (let i = 0; i < papers.length; i++) {
+        papers[i].animate(i > 0 ? papers[i-1] : undefined);
+    }
+    coauthors.forEach(coauthor => coauthor.animate());
+
     clear();
     drawTitle(author, canvasWidth / 2, topMargin / 2);
 
