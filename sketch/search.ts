@@ -11,7 +11,7 @@ function setupSearch(datas: p5.Table) {
 }
 
 function submit(author: string) {
-    sketch.changeAuthor(author);
+    sketchPapers.changeAuthor(author);
 }
 
 function autocomplete(inp: HTMLFormElement, arr: string[]) {

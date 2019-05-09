@@ -1,9 +1,9 @@
-class Sketch {
-    table: p5.Table;
-    cleanedData: p5.Table;
+class SketchKeywords {
+    papersTable: p5.Table;
+    authorsTable: p5.Table;
     author = "Alex T. Pang";
     papers: Paper[];
-    canvasWidth = window.innerWidth;
+    canvasWidth = window.innerWidth / 5;
     topMargin = 130;
     coauthors: Author[];
     yStep = 70;
@@ -13,7 +13,7 @@ class Sketch {
 
     changeAuthor(author: string) {
         this.author = author;
-        this.papers = this.getAuthorPapers(author, this.table);
+        this.papers = this.getAuthorPapers(author, this.papersTable);
 
         var minCitations = Infinity;
         var maxCitations = 0;
@@ -62,12 +62,12 @@ class Sketch {
 
     preload() {
         // @ts-ignore
-        this.table = this.p.loadTable('data/IEEE VIS papers 1990-2018 - Main dataset.csv', 'csv', 'header');
-		this.cleanedData = this.p.loadTable("data/authors-affiliations-cleaned-March-25-2019.csv", 'csv', "header");
+        this.papersTable = this.p.loadTable('data/IEEE VIS papers 1990-2018 - Main dataset.csv', <any>'csv', <any>'header');
+		this.authorsTable = this.p.loadTable("data/authors-affiliations-cleaned-March-25-2019.csv", <any>'csv', <any>'header');
     }
 
     setup() {
-		setupSearch(this.cleanedData);
+		setupSearch(this.authorsTable);
         this.changeAuthor(this.author);        
         this.p.createCanvas(this.canvasWidth, this.papers.length * this.yStep + this.topMargin);
     }
@@ -147,8 +147,8 @@ class Sketch {
 
     getAuthorCitations(author: string): number {
         var citations = 0;
-        for (let i = 0; i < this.table.getRowCount(); i++) {
-            const row = this.table.getRow(i);
+        for (let i = 0; i < this.papersTable.getRowCount(); i++) {
+            const row = this.papersTable.getRow(i);
             if (row.get('AuthorNames-Deduped').toString().split(';').indexOf(author) >= 0) {
                 var paperCitations = parseInt(row.get('AminerCitationCount_02-2019').toString());
                 citations += isNaN(paperCitations) ? 0 : paperCitations;
@@ -241,8 +241,8 @@ class Sketch {
 
     getAllKeywords(): string[] {
         let set = new Set<string>();
-        for (var i = 0; i < this.table.getRowCount(); i++) {
-            var keywords:string[] = this.table.getRow(i).get("AuthorKeywords").toString().split(",");
+        for (var i = 0; i < this.papersTable.getRowCount(); i++) {
+            var keywords:string[] = this.papersTable.getRow(i).get("AuthorKeywords").toString().split(",");
             keywords.forEach(keyword => set.add(keyword));
         }
         return Array.from(set.values());
@@ -252,7 +252,7 @@ class Sketch {
         var map1 = new Map();
     
         for (var i = 0; i < datas.length; i++) {
-            let paper = this.table.findRow(datas[i].get("DOI"), "DOI");
+            let paper = this.papersTable.findRow(datas[i].get("DOI"), "DOI");
             let keywordList = paper.get("AuthorKeywords").toString().split(",");
     
             let abstract = paper.get("Abstract").toString();
