@@ -1,20 +1,18 @@
 class Keyword {
     label:string;
     count:number;
+    size:number;
     color:string;
     papers: Paper [];
     x:number;
     y:number;
 
-    constructor(label: string, color: string) {
+    constructor(private p: p5, label: string, count:number, size:number, color: string) {
 
         this.label = label;
         this.color = color;
-        this.count = 0;
-    }
-
-    increment() {
-        this.count += 1;
+        this.count = count;
+        this.size = size;
     }
 
     setPosition(x:number, y:number) {
@@ -31,15 +29,16 @@ class Keyword {
         return isIn.length > 0;
     }
 
-    drawShape(size:number) {
-        stroke(this.color);
-        rect(this.x, this.y, 10, size, 20);
+    drawShape() {
+        this.p.stroke(this.color);
+        this.p.fill(this.color);
+        this.p.rect(this.x, this.y, 10, this.size, 20);
     }
 
-    drawLabel(size:number) {
-        noStroke();
-	    textSize(12);
-        fill(this.color);
-        text(this.label, this.x + 30, this.y + size/2);
+    drawLabel() {
+        this.p.noStroke();
+	    this.p.textSize(12);
+        this.p.fill(this.color);
+        this.p.text(this.label, this.x + 30, this.y + this.size/2);
     }
 }
