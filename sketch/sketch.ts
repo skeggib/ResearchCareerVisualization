@@ -7,6 +7,7 @@ let canvasWidth = window.innerWidth;
 let topMargin = 130;
 let coauthors: Author[];
 let yStep = 70;
+let allKeywords:string[];
 
 function preload() {
     // @ts-ignore
@@ -59,6 +60,8 @@ function setup() {
     initializeCoauthorsPositions(coauthors);
     
     createCanvas(canvasWidth, papers.length * yStep + topMargin);
+
+    allKeywords = getAllKeywords();
 }
 
 function draw() {
@@ -226,4 +229,51 @@ function initializeCoauthorsPositions(coauthors: Author[]) {
             coauthor.y = meanY;;
         }
     }
+}
+
+function getAllKeywords() {
+    var list: string[];
+    for (var i = 0; i < table.getRowCount(); i++) {
+        var keyword:string[] = table.getRow(i).get("AuthorKeywords").toString().split(",");
+        for (var j = 0; j < keyword.length; j++) {
+            if (list.find(label => label == keyword[j].trim()).length == 0) {
+                list.push(keyword[j].trim());
+            }
+        }
+    }
+    return list;
+}
+
+function getKeywordsCount(datas:any[]) {
+    var map1 = new Map();
+
+    for (var i = 0; i < datas.length; i++) {
+        let paper = table.findRow(datas[i].get("DOI"), "DOI");
+        let keywordList = paper.get("AuthorKeywords").toString().split(",");
+
+        let abstract = paper.get("Abstract").toString();
+        let title = paper.get("Title").toString();
+
+        for (var j = 0; j < keywordList.length; j++) {
+            let key = keywordList[j].trim().replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
+            if (map1.get(key) == undefined && key != "") {
+                map1.set(key, 1);
+            } else if (key != "") {
+                map1.set(key, map1.get(key) + 1);
+            }
+        }
+
+        for (var j = 0; j < allKeywords.length; j++) {
+            let key = allKeywords[j].replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
+            if ((abstract.includes(key) || title.includes(key)) && keywordList.find(el => el == key).length == 0) {
+                if (map1.get(key) == undefined) {
+                    map1.set(key, 1);
+                } else if (key != "") {
+                    map1.set(key, map1.get(key) + 1);
+                }
+            }
+        }
+    }
+
+    return map1;
 }
