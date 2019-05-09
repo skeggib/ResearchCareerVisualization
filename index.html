@@ -3,21 +3,30 @@
 <head>
     <title>Research career visualization</title>
 
-    <script src="lib/p5.min.js"></script>   
+    <script src="lib/p5.min.js"></script>
     <script src="build/build.js"></script>
 
     <link rel="shortcut icon" href="https://p5js.org/assets/img/favicon.ico">
-        <link rel="icon" href="https://p5js.org/assets/img/favicon.ico">
+    <link rel="icon" href="https://p5js.org/assets/img/favicon.ico">
 
-    <style>
-        * {
-            padding: 0px;
-            margin: 0px;
-        }
-    </style>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="style.css" media="screen" />
 </head>
 
 <body>
+    <div class="topnav">
+        <a class="active" href="#home">Home</a>
+        <a href="./about.html">About</a>
+        <div class="search-container">
+            <div autocomplete="off">
+                <div class="autocomplete">
+                    <input id="search" type="text" placeholder="Author name" name="search">
+                </div>
+                <button onclick="submit(document.getElementById('search').value)">Submit</button>
+            </div>
+        </div>
+    </div>
+    <div id="canvas"></div>
 </body>
 
 </html>
