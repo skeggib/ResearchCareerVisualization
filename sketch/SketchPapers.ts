@@ -58,9 +58,8 @@ class SketchPapers {
     }
 
     preload() {
-        // @ts-ignore
-        this.papersTable = this.p.loadTable('data/IEEE VIS papers 1990-2018 - Main dataset.csv', <any>'csv', <any>'header');
-		this.authorsTable = this.p.loadTable("data/authors-affiliations-cleaned-March-25-2019.csv", <any>'csv', <any>'header');
+        this.papersTable = <p5.Table>this.p.loadTable('data/IEEE VIS papers 1990-2018 - Main dataset.csv', <any>'csv', <any>'header');
+		this.authorsTable = <p5.Table>this.p.loadTable("data/authors-affiliations-cleaned-March-25-2019.csv", <any>'csv', <any>'header');
     }
 
     setup() {
