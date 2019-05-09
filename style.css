@@ -8,8 +8,11 @@ body {
 }
 
 .topnav {
+  z-index: 3;
+  position: fixed;
   background-color: #e9e9e9;
   height: 48px;
+  width: 100%;
 }
 
 .topnav a {
@@ -131,10 +134,14 @@ body {
 }
 
 #sketch-keywords {
+  z-index: 2;
   position: fixed;
+  top: 48px;
 }
 
 #sketch-papers {
+  z-index: 2;
   position: absolute;
   left: 20vw;
+  top: 48px;
 }
