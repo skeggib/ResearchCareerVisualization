@@ -54,10 +54,10 @@ class SketchKeywords {
     }
 
     setup() {
-        this.p.createCanvas(this.canvasWidth, this.canvasHeight);
+        let canvas = this.p.createCanvas(this.canvasWidth, this.canvasHeight);
         this.allKeywords = this.getAllKeywords();
-        console.log(this.allKeywords)
         this.changeAuthor(this.author);
+        canvas.parent('sketch-keywords');
     }
 
     draw() {

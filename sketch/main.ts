@@ -4,7 +4,7 @@ let p5Keywords = new p5((p: p5) => {
     p.preload = () => sketchKeywords.preload();
     p.setup = () => sketchKeywords.setup();
     p.draw = () => sketchKeywords.draw();
-}, document.getElementById('sketch-keywords'));
+});
 
 let sketchPapers: SketchPapers;
 let p5Papers = new p5((p: p5) => {
@@ -12,4 +12,4 @@ let p5Papers = new p5((p: p5) => {
     p.preload = () => sketchPapers.preload();
     p.setup = () => sketchPapers.setup();
     p.draw = () => sketchPapers.draw();
-}, document.getElementById('sketch-papers'));
+});
