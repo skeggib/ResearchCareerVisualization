@@ -7,6 +7,7 @@ class Sketch {
     topMargin = 130;
     coauthors: Author[];
     yStep = 70;
+    allKeywords:string[];
 
     constructor(private p: p5) {}
 
@@ -55,12 +56,14 @@ class Sketch {
         });
         
         this.initializeCoauthorsPositions(this.coauthors);
+
+        this.allKeywords = this.getAllKeywords();
     }
 
     preload() {
         // @ts-ignore
         this.table = this.p.loadTable('data/IEEE VIS papers 1990-2018 - Main dataset.csv', 'csv', 'header');
-		this.cleanedData = this.p.loadTable("data/authors-affiliations-cleaned-March-25-2019.csv", "csv", "header");
+		this.cleanedData = this.p.loadTable("data/authors-affiliations-cleaned-March-25-2019.csv", 'csv', "header");
     }
 
     setup() {
@@ -234,5 +237,48 @@ class Sketch {
                 coauthor.y = meanY;;
             }
         }
+    }
+
+    getAllKeywords(): string[] {
+        let set = new Set<string>();
+        for (var i = 0; i < this.table.getRowCount(); i++) {
+            var keywords:string[] = this.table.getRow(i).get("AuthorKeywords").toString().split(",");
+            keywords.forEach(keyword => set.add(keyword));
+        }
+        return Array.from(set.values());
+    }
+    
+    getKeywordsCount(datas:any[]) {
+        var map1 = new Map();
+    
+        for (var i = 0; i < datas.length; i++) {
+            let paper = this.table.findRow(datas[i].get("DOI"), "DOI");
+            let keywordList = paper.get("AuthorKeywords").toString().split(",");
+    
+            let abstract = paper.get("Abstract").toString();
+            let title = paper.get("Title").toString();
+    
+            for (var j = 0; j < keywordList.length; j++) {
+                let key = keywordList[j].trim().replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
+                if (map1.get(key) == undefined && key != "") {
+                    map1.set(key, 1);
+                } else if (key != "") {
+                    map1.set(key, map1.get(key) + 1);
+                }
+            }
+    
+            for (var j = 0; j < this.allKeywords.length; j++) {
+                let key = this.allKeywords[j].replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
+                if ((abstract.includes(key) || title.includes(key)) && keywordList.find(el => el == key)) {
+                    if (map1.get(key) == undefined) {
+                        map1.set(key, 1);
+                    } else if (key != "") {
+                        map1.set(key, map1.get(key) + 1);
+                    }
+                }
+            }
+        }
+    
+        return map1;
     }
 }
