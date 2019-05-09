@@ -55,6 +55,9 @@ class SketchPapers {
         });
         
         this.initializeCoauthorsPositions(this.coauthors);
+        
+        let canvas = this.p.createCanvas(this.canvasWidth, this.papers.length * this.yStep + this.topMargin);
+        canvas.parent('sketch-papers');
     }
 
     preload() {
@@ -64,9 +67,7 @@ class SketchPapers {
 
     setup() {
 		setupSearch(this.authorsTable);
-        this.changeAuthor(this.author);        
-        let canvas = this.p.createCanvas(this.canvasWidth, this.papers.length * this.yStep + this.topMargin);
-        canvas.parent('sketch-papers');
+        this.changeAuthor(this.author);
     }
 
     draw() {
