@@ -60,6 +60,7 @@ class SketchKeywords {
     }
 
     draw() {
+        this.p.clear();
         this.keywordList.forEach(k => {
             k.drawShape();
             k.drawLabel();
