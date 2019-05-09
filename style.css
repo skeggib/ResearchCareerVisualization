@@ -129,3 +129,12 @@ body {
 #sketches {
   display: flex;
 }
+
+#defaultCanvas0 {
+  position: fixed;
+}
+
+#defaultCanvas1 {
+  position: absolute;
+  left: 20vw;
+}
