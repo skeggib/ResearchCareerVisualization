@@ -69,7 +69,8 @@ class SketchKeywords {
     setup() {
 		setupSearch(this.authorsTable);
         this.changeAuthor(this.author);        
-        this.p.createCanvas(this.canvasWidth, this.papers.length * this.yStep + this.topMargin);
+        let canvas = this.p.createCanvas(this.canvasWidth, this.papers.length * this.yStep + this.topMargin);
+        canvas.parent('sketch-keywords');
     }
 
     draw() {

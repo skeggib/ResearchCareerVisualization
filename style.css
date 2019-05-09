@@ -130,11 +130,11 @@ body {
   display: flex;
 }
 
-#defaultCanvas0 {
+#sketch-keywords {
   position: fixed;
 }
 
-#defaultCanvas1 {
+#sketch-papers {
   position: absolute;
   left: 20vw;
 }
