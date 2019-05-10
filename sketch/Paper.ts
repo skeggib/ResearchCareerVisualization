@@ -6,6 +6,9 @@ class Paper {
     citations: number;
     minCitations: number;
     maxCitations: number;
+    keywords: string[];
+    abstract: string;
+    doi: string;
 
     x: number;
     y: number;

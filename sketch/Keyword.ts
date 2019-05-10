@@ -3,16 +3,12 @@ class Keyword {
     count:number;
     size:number;
     color:string;
-    papers: Paper [];
+    papers: Paper [] = new Array<Paper>();
     x:number;
     y:number;
 
-    constructor(private p: p5, label: string, count:number, size:number, color: string) {
+    constructor(private p: p5) {
 
-        this.label = label;
-        this.color = color;
-        this.count = count;
-        this.size = size;
     }
 
     setPosition(x:number, y:number) {

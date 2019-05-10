@@ -9,28 +9,27 @@ class SketchKeywords {
     coauthors: Author[];
     yStep = 70;
     allKeywords: string[];
-    keywordCount: Map<any, any>;
     keywordList: Keyword[] = new Array<Keyword>();
     colors: string[] = [
-        '#e6194b', 
-        '#3cb44b', 
-        '#ffe119', 
-        '#4363d8', 
-        '#f58231', 
-        '#911eb4', 
-        '#46f0f0', 
-        '#f032e6', 
-        '#bcf60c', 
-        '#fabebe', 
-        '#008080', 
-        '#e6beff', 
-        '#9a6324', 
-        '#fffac8', 
-        '#800000', 
-        '#aaffc3', 
-        '#808000', 
-        '#ffd8b1', 
-        '#000075', 
+        '#e6194b',
+        '#3cb44b',
+        '#ffe119',
+        '#4363d8',
+        '#f58231',
+        '#911eb4',
+        '#46f0f0',
+        '#f032e6',
+        '#bcf60c',
+        '#fabebe',
+        '#008080',
+        '#e6beff',
+        '#9a6324',
+        '#fffac8',
+        '#800000',
+        '#aaffc3',
+        '#808000',
+        '#ffd8b1',
+        '#000075',
         '#808080'
     ];
 
@@ -38,34 +37,35 @@ class SketchKeywords {
 
     changeAuthor(author: string) {
         this.author = author;
-        let authorData = this.authorsTable.findRows(author, 'AuthorNames-Deduped');
-        this.keywordCount = this.getKeywordsCount(authorData);
-        let mapSort1 = new Map([...this.keywordCount.entries()].sort((a, b) => b[1] - a[1]));
+        this.papers = this.getAuthorPapers(author, this.papersTable);
+        //let authorData = this.authorsTable.findRows(author, 'AuthorNames-Deduped');
+        this.getKeywordsCount();
+        this.keywordList = this.keywordList.sort((el1, el2) => {return el2.count - el1.count});
         let sum = 0;
 
         let i = 0;
-        mapSort1.forEach((value, key) => {
+        this.keywordList.forEach((value) => {
             if (i < 20) {
-                sum += value;
+                sum += value.count;
             }
             i++;
         })
+        console.log(sum);
 
-        let nextY = 5;
+        let nextY: number = 5;
         i = 0;
-        this.keywordList = new Array<Keyword>();
-        mapSort1.forEach((value, key) => {
+        this.keywordList.forEach((value) => {
 
-            if(i < 20) {
-                let k = new Keyword(this.p, key, value, +value / sum * (this.canvasHeight -110), this.colors[i]);
-                k.setPosition(5, nextY);
-                this.keywordList.push(k);
-                nextY += +value / sum * (this.canvasHeight -110);
+            if (i < 20) {
+                value.size = value.count / sum * (this.canvasHeight - 110);
+                value.color = this.colors[i];
+                value.setPosition(5, nextY);
+                nextY += value.count / sum * (this.canvasHeight - 110);
                 nextY += 5;
-                console.log(k.x + " " + k.y + " " + k.size)
             }
             i++;
         })
+        console.log(this.keywordList);
     }
 
     preload() {
@@ -83,52 +83,84 @@ class SketchKeywords {
 
     draw() {
         this.p.clear();
+        let i = 0;
         this.keywordList.forEach(k => {
-            k.drawShape();
-            k.drawLabel();
+            if( i < 20) {
+                k.drawShape();
+                k.drawLabel();
+            }
+            i++;
         })
     }
 
     getAllKeywords(): string[] {
         let set = new Set<string>();
         for (var i = 0; i < this.papersTable.getRowCount(); i++) {
-            var keywords: string[] = this.papersTable.getRow(i).get("AuthorKeywords").toString().split(",");
+            var keywords: string[] = this.papersTable.getRow(i).get("AuthorKeywords").toString().toLowerCase().split(",");
             keywords.forEach(keyword => set.add(keyword));
         }
         return Array.from(set.values());
     }
 
-    getKeywordsCount(datas: any[]) {
-        var map1 = new Map();
-
-        for (var i = 0; i < datas.length; i++) {
-            let paper = this.papersTable.findRow(datas[i].get("DOI"), "DOI");
-            let keywordList = paper.get("AuthorKeywords").toString().split(",");
-
-            let abstract = paper.get("Abstract").toString();
-            let title = paper.get("Title").toString();
-
-            for (var j = 0; j < keywordList.length; j++) {
-                let key = keywordList[j].trim().replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
-                if (map1.get(key) == undefined && key != "") {
-                    map1.set(key, 1);
+    getKeywordsCount() {
+        for (var i = 0; i < this.papers.length; i++) {
+            for (var j = 0; j < this.papers[i].keywords.length; j++) {
+                let key = this.papers[i].keywords[j].trim().replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
+                let k = this.keywordList.find(el => el.label == key);
+                if (k && key != "") {
+                    k.count += 1;
+                    if(k.papers.find(p => p.doi == this.papers[i].doi) == undefined) {
+                        k.papers.push(this.papers[i]);
+                    }
                 } else if (key != "") {
-                    map1.set(key, map1.get(key) + 1);
+                    k = new Keyword(this.p);
+                    k.label = key;
+                    k.count = 1;
+                    k.papers.push(this.papers[i]);
+                    this.keywordList.push(k);
                 }
             }
 
             for (var j = 0; j < this.allKeywords.length; j++) {
                 let key = this.allKeywords[j].replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
-                if ((abstract.includes(key) || title.includes(key)) && keywordList.find(el => el == key)) {
-                    if (map1.get(key) == undefined) {
-                        map1.set(key, 1);
+                if ((this.papers[i].abstract.includes(key) || this.papers[i].title.includes(key)) && this.papers[i].keywords.find(el => el == key)) {
+                    let k = this.keywordList.find(el => el.label == key);
+                    if (k && key != "") {
+                        k.count += 1;
                     } else if (key != "") {
-                        map1.set(key, map1.get(key) + 1);
+                        k = new Keyword(this.p);
+                        k.label = key;
+                        k.count = 1;
+                        this.keywordList.push(k);
                     }
                 }
             }
         }
+    }
 
-        return map1;
+    getAuthorPapers(author: string, table: p5.Table): Paper[] {
+        var papers = Array<Paper>();
+        for (let i = 0; i < table.getRowCount(); i++) {
+            const row = table.getRow(i);
+            const authorsStr = row.get('AuthorNames-Deduped').toString();
+            if (authorsStr.indexOf(author) >= 0) {
+                var authors = Array<string>();
+                authorsStr.split(';').forEach(author => {
+                    authors.push(author);
+                });
+                var title = row.get('Title').toString();
+
+                var year = parseInt(row.get('Year').toString());
+                var authors = authors;
+                var affiliation = row.get('AuthorAffiliation').toString();
+                var citations = parseInt(row.get('AminerCitationCount_02-2019').toString());
+                var paper = new Paper(this.p, title, year, authors, affiliation, citations);
+                paper.abstract = row.get('Abstract').toString();
+                paper.keywords = row.get("AuthorKeywords").toString().toLowerCase().split(",");
+                paper.doi = row.get("DOI").toString();
+                papers.push(paper);
+            }
+        }
+        return papers.sort((a, b) => a.year - b.year);;
     }
 }
