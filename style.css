@@ -132,6 +132,7 @@ body {
 
 #sketch-keywords {
   position: fixed;
+  height: 100vh;
 }
 
 #sketch-papers {

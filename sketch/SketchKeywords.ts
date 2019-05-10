@@ -36,10 +36,10 @@ class SketchKeywords {
         mapSort1.forEach((value, key) => {
             if(i < 20) {
                 console.log( value / sum );
-                let k = new Keyword(this.p, key, value, +value / sum * (this.canvasHeight - 200), this.colors[i]);
+                let k = new Keyword(this.p, key, value, +value / sum * (this.canvasHeight -110), this.colors[i]);
                 k.setPosition(5, nextY);
                 this.keywordList.push(k);
-                nextY += +value / sum * (this.canvasHeight - 200);
+                nextY += +value / sum * (this.canvasHeight -110);
                 nextY += 5;
                 console.log(k.x + " " + k.y + " " + k.size)
             }
@@ -54,6 +54,7 @@ class SketchKeywords {
     }
 
     setup() {
+        this.canvasHeight = document.getElementById('sketch-keywords').offsetHeight - 48;
         let canvas = this.p.createCanvas(this.canvasWidth, this.canvasHeight);
         this.allKeywords = this.getAllKeywords();
         this.changeAuthor(this.author);
