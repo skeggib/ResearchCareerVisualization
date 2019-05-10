@@ -11,6 +11,7 @@ function setupSearch(datas: p5.Table) {
 }
 
 function submit(author: string) {
+    sketchKeywords.changeAuthor(author);
     sketchPapers.changeAuthor(author);
 }
 

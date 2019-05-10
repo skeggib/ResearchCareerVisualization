@@ -41,6 +41,8 @@ class Author {
         var minArea = 250;
         var maxArea = 5000;
         var area = this.p.map(this.citations, this.minAuthorCitations, this.maxAuthorCitations, minArea, maxArea);
+        if (isNaN(area))
+            area = (minArea + maxArea) / 2;
         return this.p.sqrt(area / this.p.PI);
     }
 
