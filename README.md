@@ -1,3 +1,11 @@
 # Research career visualization
 
-To launch the visualization just open the `index.html` file with Firefox or Edge (the typescript is already compiled so the app can be used out of the box).
+## Building the Docker image
+
+`docker build . -t rcv`
+
+## Running the image
+
+To run the visualization on port 8000:
+
+`docker run --name rcv -d -p 8000:80 rcv`

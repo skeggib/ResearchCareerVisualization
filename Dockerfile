@@ -13,6 +13,7 @@ RUN npm i
 COPY lib/ /var/www/html/lib
 COPY data/ /var/www/html/data
 COPY index.html /var/www/html/
+COPY style.css /var/www/html/
 
 COPY tsconfig.json /app/
 COPY definitions/ /app/definitions
