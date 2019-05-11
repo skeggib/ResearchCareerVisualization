@@ -40,7 +40,8 @@ class SketchKeywords {
         this.author = author;
         this.papers = this.getAuthorPapers(author, this.papersTable);
         //let authorData = this.authorsTable.findRows(author, 'AuthorNames-Deduped');
-        this.getKeywordsCount();
+        this.keywordList = new Array<Keyword>();
+        this.countKeywords();
         this.keywordList = this.keywordList.sort((el1, el2) => {return el2.count - el1.count});
         let sum = 0;
 
@@ -65,6 +66,8 @@ class SketchKeywords {
             }
             i++;
         })
+        console.clear();
+        this.papers.forEach(paper => console.log(paper.keywords));
     }
 
     preload() {
@@ -100,46 +103,59 @@ class SketchKeywords {
     getAllKeywords(): string[] {
         let set = new Set<string>();
         for (var i = 0; i < this.papersTable.getRowCount(); i++) {
-            var keywords: string[] = this.papersTable.getRow(i).get("AuthorKeywords").toString().toLowerCase().split(",");
-            keywords.forEach(keyword => set.add(keyword));
+            var keywords = this.papersTable.getRow(i).get("AuthorKeywords").toString().toLowerCase().split(",");
+            keywords.forEach(keyword => set.add(keyword.trim()));
         }
         return Array.from(set.values());
     }
 
-    getKeywordsCount() {
-        for (var i = 0; i < this.papers.length; i++) {
-            for (var j = 0; j < this.papers[i].keywords.length; j++) {
-                let key = this.papers[i].keywords[j].trim().replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
-                let k = this.keywordList.find(el => el.label == key);
-                if (k && key != "") {
-                    k.count += 1;
-                    if(k.papers.find(p => p.doi == this.papers[i].doi) == undefined) {
-                        k.papers.push(this.papers[i]);
-                    }
-                } else if (key != "") {
-                    k = new Keyword(this.p);
-                    k.label = key;
-                    k.count = 1;
-                    k.papers.push(this.papers[i]);
-                    this.keywordList.push(k);
+    countKeywords() {
+        this.papers.forEach(paper => {
+            paper.keywords.forEach(keywordLabel => {
+                //keywordLabel = keywordLabel.replace(/[e']s$/, '').replace(/([^aiou])s$/, '$1');
+                if (keywordLabel == '') {
+                    return;
                 }
-            }
+                
+                let keyword = this.keywordList.find(k => k.label == keywordLabel);
+                if (keyword) {
+                    keyword.count += 1;
+                    if(keyword.papers.find(p => p.doi == paper.doi) == undefined) {
+                        keyword.papers.push(paper);
+                    }
+                } else {
+                    keyword = new Keyword(this.p);
+                    keyword.label = keywordLabel;
+                    keyword.count = 1;
+                    keyword.papers.push(paper);
+                    if (keyword.label == 'stress')
+                        console.log('paper')
+                    this.keywordList.push(keyword);
+                }
+            });
 
-            for (var j = 0; j < this.allKeywords.length; j++) {
-                let key = this.allKeywords[j].replace(/[e']s$/, '').replace(/([^aiou])s/, '$1');
-                if ((this.papers[i].abstract.includes(key) || this.papers[i].title.includes(key)) && this.papers[i].keywords.find(el => el == key)) {
-                    let k = this.keywordList.find(el => el.label == key);
-                    if (k && key != "") {
-                        k.count += 1;
-                    } else if (key != "") {
-                        k = new Keyword(this.p);
-                        k.label = key;
-                        k.count = 1;
-                        this.keywordList.push(k);
+            this.allKeywords.forEach(keywordLabel => {
+                //keywordLabel = keywordLabel.replace(/[e']s$/, '').replace(/([^aiou])s$/, '$1');
+                if (keywordLabel == '') {
+                    return;
+                }
+
+                if ((paper.abstract.includes(keywordLabel) || paper.title.includes(keywordLabel)) && paper.keywords.find(el => el == keywordLabel)) {
+                    let keyword = this.keywordList.find(k => k.label == keywordLabel);
+                    if (keyword) {
+                        keyword.count += 1;
+                    } else {
+                        keyword = new Keyword(this.p);
+                        keyword.label = keywordLabel;
+                        keyword.count = 1;
+                        keyword.papers.push(paper);
+                        if (keyword.label == 'stress')
+                            console.log('all')
+                        this.keywordList.push(keyword);
                     }
                 }
-            }
-        }
+            });
+        });
     }
 
     getAuthorPapers(author: string, table: p5.Table): Paper[] {
@@ -160,7 +176,7 @@ class SketchKeywords {
                 var citations = parseInt(row.get('AminerCitationCount_02-2019').toString());
                 var paper = new Paper(this.p, title, year, authors, affiliation, citations);
                 paper.abstract = row.get('Abstract').toString();
-                paper.keywords = row.get("AuthorKeywords").toString().toLowerCase().split(",");
+                paper.keywords = row.get("AuthorKeywords").toString().toLowerCase().split(",").map(keyword => keyword.trim());
                 paper.doi = row.get("DOI").toString();
                 papers.push(paper);
             }

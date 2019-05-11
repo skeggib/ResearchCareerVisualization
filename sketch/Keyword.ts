@@ -16,11 +16,7 @@ class Keyword {
         this.y = y;
     }
 
-    addPaper(paper:Paper) {
-        this.papers.push(paper);
-    }
-
-    isInPaper(paper:Paper) {
+    isInPaper(paper: Paper): boolean {
         let isIn:Paper[] = this.papers.filter(p => p.title == paper.title);
         return isIn.length > 0;
     }
