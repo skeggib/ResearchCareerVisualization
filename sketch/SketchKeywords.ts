@@ -10,6 +10,7 @@ class SketchKeywords {
     yStep = 70;
     allKeywords: string[];
     keywordList: Keyword[] = new Array<Keyword>();
+    selectedPaper: Paper;
     colors: string[] = [
         '#e6194b',
         '#3cb44b',
@@ -50,7 +51,6 @@ class SketchKeywords {
             }
             i++;
         })
-        console.log(sum);
 
         let nextY: number = 5;
         i = 0;
@@ -65,7 +65,6 @@ class SketchKeywords {
             }
             i++;
         })
-        console.log(this.keywordList);
     }
 
     preload() {
@@ -84,10 +83,15 @@ class SketchKeywords {
     draw() {
         this.p.clear();
         let i = 0;
-        this.keywordList.forEach(k => {
+        this.keywordList.forEach(keyword => {
             if( i < 20) {
-                k.drawShape();
-                k.drawLabel();
+                if (this.selectedPaper === undefined || keyword.isInPaper(this.selectedPaper)) {
+                    keyword.drawShape();
+                    keyword.drawLabel();
+                } else {
+                    keyword.drawShape(true);
+                    keyword.drawLabel(true);
+                }
             }
             i++;
         })

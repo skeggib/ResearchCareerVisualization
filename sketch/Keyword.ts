@@ -1,11 +1,11 @@
 class Keyword {
-    label:string;
-    count:number;
-    size:number;
-    color:string;
+    label: string;
+    count: number;
+    size: number;
+    color: string;
     papers: Paper [] = new Array<Paper>();
-    x:number;
-    y:number;
+    x: number;
+    y: number;
 
     constructor(private p: p5) {
 
@@ -25,16 +25,26 @@ class Keyword {
         return isIn.length > 0;
     }
 
-    drawShape() {
-        this.p.stroke(this.color);
-        this.p.fill(this.color);
+    drawShape(grayed: boolean = false) {
+        let color: string;
+        if (grayed)
+            color = '#DDD';
+        else
+            color = this.color;
+        this.p.stroke(color);
+        this.p.fill(color);
         this.p.rect(this.x, this.y, 10, this.size, 20);
     }
 
-    drawLabel() {
+    drawLabel(grayed: boolean = false) {
+        let color: string;
+        if (grayed)
+            color = '#DDD';
+        else
+            color = this.color;
         this.p.noStroke();
 	    this.p.textSize(12);
-        this.p.fill(this.color);
+        this.p.fill(color);
         this.p.text(this.label, this.x + 30, this.y + this.size/2);
     }
 }

@@ -8,7 +8,7 @@ class SketchPapers {
     coauthors: Author[];
     yStep = 70;
 
-    constructor(private p: p5) {}
+    constructor(private p: p5, private sketchKeywords: SketchKeywords) {}
 
     changeAuthor(author: string) {
         this.author = author;
@@ -109,6 +109,11 @@ class SketchPapers {
                     coauthor.displayMode = DisplayMode.HIGHLIGHTED;
             });
         }
+        if (highlightedPaper)
+            this.sketchKeywords.selectedPaper = this.sketchKeywords.papers.find(paper => paper.title === highlightedPaper.title);
+        else
+            this.sketchKeywords.selectedPaper  = undefined;
+
         if (highlightedCoauthor !== undefined) {
             highlightedCoauthor.displayMode = DisplayMode.HIGHLIGHTED;
             highlightedCoauthor.papers.forEach(paper => paper.displayMode = DisplayMode.HIGHLIGHTED);
