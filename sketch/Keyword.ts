@@ -35,6 +35,6 @@ class Keyword {
         this.p.noStroke();
 	    this.p.textSize(12);
         this.p.fill(this.color);
-        this.p.text(this.label, this.x + 30, this.y + this.size/2);
+        this.p.text(this.label, this.x + 30, this.y + this.size/2 + 4);
     }
 }
