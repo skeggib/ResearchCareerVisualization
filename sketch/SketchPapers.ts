@@ -220,8 +220,9 @@ class SketchPapers {
     initializeCoauthorsPositions(coauthors: Author[]) {
         for (let i = 0; i < coauthors.length; i++) {
             const coauthor = coauthors[i];
+            coauthor.left = i%2 == 0;
             if (coauthor.papers.length == 1) {
-                coauthor.x = i%2 == 0 ? coauthor.papers[0].x + 200 : coauthor.papers[0].x - 200;
+                coauthor.x = coauthor.left ? coauthor.papers[0].x - 200 : coauthor.papers[0].x + 200;
                 coauthor.y = coauthor.papers[0].y + this.p.random(-50, 50);
             } else {
                 var minX = this.canvasWidth;
@@ -236,7 +237,7 @@ class SketchPapers {
                 });
                 meanY /= coauthor.papers.length;
 
-                coauthor.x = i%2 == 0 ? maxX + 300 : minX - 300;
+                coauthor.x = coauthor.left ? maxX - 300 : minX + 300;
                 coauthor.y = meanY;;
             }
         }
