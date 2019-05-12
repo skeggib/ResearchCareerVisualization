@@ -23,7 +23,7 @@ class SketchKeywords {
         '#bcf60c',
         '#fabe4a',
         '#008080',
-        '#e6beff',
+        '#ff8300',
         '#9a6324',
         '#ff0000',
         '#800000',
@@ -66,8 +66,8 @@ class SketchKeywords {
             }
             i++;
         })
-        console.clear();
-        this.papers.forEach(paper => console.log(paper.keywords));
+        //console.clear();
+        //this.papers.forEach(paper => console.log(paper.keywords));
     }
 
     preload() {
@@ -112,7 +112,7 @@ class SketchKeywords {
     countKeywords() {
         this.papers.forEach(paper => {
             paper.keywords.forEach(keywordLabel => {
-                //keywordLabel = keywordLabel.replace(/[e']s$/, '').replace(/([^aiou])s$/, '$1');
+                keywordLabel = keywordLabel.replace(/ies$/, 'y').replace(/as$/, 'a').replace(/es$/, 'e').replace(/os$/, 'o').replace(/ts$/, 't').replace(/ds$/, 'd');
                 if (keywordLabel == '') {
                     return;
                 }
@@ -120,7 +120,7 @@ class SketchKeywords {
                 let keyword = this.keywordList.find(k => k.label == keywordLabel);
                 if (keyword) {
                     keyword.count += 1;
-                    if(keyword.papers.find(p => p.doi == paper.doi) == undefined) {
+                    if(keyword.papers.find(p => p.title == paper.title) == undefined) {
                         keyword.papers.push(paper);
                     }
                 } else {
@@ -128,29 +128,28 @@ class SketchKeywords {
                     keyword.label = keywordLabel;
                     keyword.count = 1;
                     keyword.papers.push(paper);
-                    if (keyword.label == 'stress')
-                        console.log('paper')
                     this.keywordList.push(keyword);
                 }
             });
 
             this.allKeywords.forEach(keywordLabel => {
-                //keywordLabel = keywordLabel.replace(/[e']s$/, '').replace(/([^aiou])s$/, '$1');
-                if (keywordLabel == '') {
+                keywordLabel = keywordLabel.replace(/ies$/, 'y').replace(/as$/, 'a').replace(/es$/, 'e').replace(/os$/, 'o').replace(/ts$/, 't').replace(/ds$/, 'd');
+                if (keywordLabel == '' || keywordLabel == 'ct') {
                     return;
                 }
 
-                if ((paper.abstract.includes(keywordLabel) || paper.title.includes(keywordLabel)) && paper.keywords.find(el => el == keywordLabel)) {
+                if ((paper.abstract.toLocaleLowerCase().includes(keywordLabel) || paper.title.toLocaleLowerCase().includes(keywordLabel))) {
                     let keyword = this.keywordList.find(k => k.label == keywordLabel);
                     if (keyword) {
                         keyword.count += 1;
+                        if(keyword.papers.find(p => p.title == paper.title) == undefined) {
+                            keyword.papers.push(paper);
+                        }
                     } else {
                         keyword = new Keyword(this.p);
                         keyword.label = keywordLabel;
                         keyword.count = 1;
                         keyword.papers.push(paper);
-                        if (keyword.label == 'stress')
-                            console.log('all')
                         this.keywordList.push(keyword);
                     }
                 }
