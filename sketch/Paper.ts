@@ -74,10 +74,12 @@ class Paper {
         
         var yearSize = 12;
         var textColor = this.displayMode == DisplayMode.GRAYED ? this.grayColor : this.p.color(0);
-        if (previousPaper !== undefined && this.x < previousPaper.x)
-            textWithBackground(this.p, this.year.toString(), yearSize, this.x - radius / 2 - 10, this.y, this.p.RIGHT, this.p.CENTER, textColor);
-        else
-            textWithBackground(this.p, this.year.toString(), yearSize, this.x + radius / 2 + 10, this.y, this.p.LEFT, this.p.CENTER, textColor);
+        if (previousPaper === undefined || previousPaper.year != this.year) {
+            if (previousPaper !== undefined && this.x < previousPaper.x)
+                textWithBackground(this.p, this.year.toString(), yearSize, this.x - radius / 2 - 10, this.y, this.p.RIGHT, this.p.CENTER, textColor);
+            else
+                textWithBackground(this.p, this.year.toString(), yearSize, this.x + radius / 2 + 10, this.y, this.p.LEFT, this.p.CENTER, textColor);
+        }
     }
 
     drawConnection(previousPaper: Paper) {

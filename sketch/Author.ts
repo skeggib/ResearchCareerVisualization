@@ -8,6 +8,7 @@ class Author {
     x: number;
     y: number;
     displayMode: DisplayMode;
+    left: boolean;
     
     currentColor: p5.Color;
     currentConnectionColor: p5.Color;
@@ -79,9 +80,11 @@ class Author {
     }
 
     drawName() {
-        if (this.displayMode == DisplayMode.HIGHLIGHTED) {
-            var titleText = this.name + ' (' + this.citations + ' citations)';
-            textWithBackground(this.p, titleText, 12, this.x, this.y + this.getSize() / 2 + 10, this.p.CENTER, this.p.TOP, this.highlightColor);
-        }
+        var color = this.displayMode == DisplayMode.GRAYED ? this.grayColor : this.highlightColor;
+        var titleText = this.name;// + ' (' + this.citations + ' citations)';
+        if (this.left)
+            textWithBackground(this.p, titleText, 12, this.x - this.getSize() / 2 - 10, this.y, this.p.RIGHT, this.p.CENTER, color);
+        else
+            textWithBackground(this.p, titleText, 12, this.x + this.getSize() / 2 + 10, this.y, this.p.LEFT, this.p.CENTER, color);
     }
 }
