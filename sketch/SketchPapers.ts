@@ -240,6 +240,22 @@ class SketchPapers {
                 coauthor.x = coauthor.left ? maxX - 300 : minX + 300;
                 coauthor.y = meanY;;
             }
+
+            for (let j = 0; j < i; j++) {
+                const curr = coauthor
+                const prev = coauthors[j];
+                if (prev.left === curr.left) {
+                    const distance = this.p.abs(prev.y - curr.y);
+                    if (distance < 50) {
+                        if (prev.y <= curr.y) {
+                            curr.y += 50 - distance;
+                        }
+                        else {
+                            curr.y -= 50 - distance;
+                        }
+                    }
+                }
+            }
         }
     }
 }
