@@ -12,7 +12,9 @@ RUN npm i
 
 COPY lib/ /var/www/html/lib
 COPY data/ /var/www/html/data
+COPY img/ /var/www/html/img
 COPY index.html /var/www/html/
+COPY about.html /var/www/html/
 COPY style.css /var/www/html/
 
 COPY tsconfig.json /app/
