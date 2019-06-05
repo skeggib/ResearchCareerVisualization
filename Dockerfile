@@ -1,7 +1,4 @@
-FROM node
-
-RUN apt update -y
-RUN apt install -y nginx
+FROM node AS build
 
 RUN npm i -g typescript
 COPY package.json /app/
@@ -10,19 +7,21 @@ COPY package-lock.json /app/
 WORKDIR /app
 RUN npm i
 
-COPY lib/ /var/www/html/lib
-COPY data/ /var/www/html/data
-COPY img/ /var/www/html/img
-COPY index.html /var/www/html/
-COPY about.html /var/www/html/
-COPY style.css /var/www/html/
-
 COPY tsconfig.json /app/
 COPY definitions/ /app/definitions
 COPY sketch/ /app/sketch
 
 RUN tsc
 
-RUN cp -r build /var/www/html/
+FROM nginx
+
+COPY lib/ /usr/share/nginx/html/lib
+COPY data/ /usr/share/nginx/html/data
+COPY img/ /usr/share/nginx/html/img
+COPY index.html /usr/share/nginx/html/
+COPY about.html /usr/share/nginx/html/
+COPY style.css /usr/share/nginx/html/
+
+COPY --from=build /app/build /usr/share/nginx/html/build
 
 CMD ["nginx", "-g", "daemon off;"]
